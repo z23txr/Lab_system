@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+
+<body class="h-screen overflow-hidden bg-[#F4F0EA] text-[#2B2A2E]">
+    <main class="relative h-screen overflow-hidden">
+        <!-- ============Shapes============== -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -left-32 -top-32 h-[520px] w-[520px] rounded-full bg-[#C7A37E]/10">
+            </div>
+            <div class="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-[#7C6A5B]/10">
+            </div>
+            <div class="absolute left-[38%] top-[-80px] h-40 w-40 rotate-45 rounded-[36px] border border-[#C7A37E]/20">
+            </div>
+            <div class="absolute bottom-[-100px] left-[42%] h-56 w-56 rounded-full border border-[#7C6A5B]/10">
+            </div>
+        </div>
+        <div class="relative grid h-full lg:grid-cols-[1.1fr_0.9fr]">
+            <section class="relative hidden h-full overflow-hidden lg:block">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="relative h-[520px] w-[620px]">
+                        <!-- ===========circle and square shapes=========== -->
+                        <div class="absolute left-20 top-20 h-72 w-72 rounded-full bg-[#C7A37E]/20 blur-2xl">
+                        </div>
+                        <div
+                            class="absolute left-24 top-28 h-64 w-64 rotate-12 rounded-[52px] border border-white/60 bg-white/35 shadow-2xl shadow-[#7C6A5B]/10 backdrop-blur-sm">
+                        </div>
+                        <div
+                            class="absolute left-36 top-20 h-60 w-60 rotate-[-14deg] rounded-[46px] bg-gradient-to-br from-[#2B2A2E] via-[#403C3B] to-[#7C6A5B] shadow-2xl shadow-[#2B2A2E]/25">
+                            <div
+                                class="absolute right-7 top-7 h-12 w-12 rounded-full border border-white/15 bg-white/10">
+                            </div>
+                            <div class="absolute bottom-8 left-8 h-3 w-24 rounded-full bg-white/10">
+                            </div>
+                        </div>
+                        <div
+                            class="absolute left-64 top-48 h-60 w-60 rotate-[18deg] rounded-[46px] bg-gradient-to-br from-[#E0D4C6] via-[#C7A37E] to-[#7C6A5B] shadow-2xl shadow-[#7C6A5B]/20">
+                            <div class="absolute left-8 top-8 h-20 w-20 rounded-full bg-white/20 blur-sm">
+                            </div>
+                            <div
+                                class="absolute bottom-8 right-8 h-14 w-14 rounded-2xl border border-white/25 bg-white/10">
+                            </div>
+                        </div>
+                        <!-- ===============Floating Dark Circle================= -->
+                        <div
+                            class="absolute right-24 top-20 flex h-24 w-24 items-center justify-center rounded-full bg-[#2B2A2E] shadow-xl shadow-[#2B2A2E]/20">
+                            <div class="h-10 w-10 rounded-full border border-[#C7A37E]/50">
+                            </div>
+                        </div>
+                        <div
+                            class="absolute bottom-24 left-20 h-20 w-20 rounded-full border-[10px] border-[#C7A37E]/40">
+                        </div>
+                        <div
+                            class="absolute bottom-16 right-20 h-16 w-16 rotate-12 rounded-2xl bg-[#7C6A5B] shadow-xl shadow-[#7C6A5B]/20">
+                        </div>
+                        <div class="absolute left-4 top-52 h-7 w-7 rotate-45 rounded-lg bg-[#C7A37E]">
+                        </div>
+                    </div>
+                </div>
+            </section>
+              <!-- ============================Login Form======================== --> 
+            <section
+                class="relative flex h-full items-center justify-center px-5 py-8 sm:px-8 lg:justify-start lg:pl-4 xl:pl-8">
+                <div class="absolute right-8 top-8 h-20 w-20 rounded-3xl border border-[#C7A37E]/20">
+                </div>
+                <div class="absolute bottom-8 left-8 h-12 w-12 rounded-full bg-[#C7A37E]/15">
+                </div>
+                <div class="w-full max-w-md">
+                    <div
+                        class="relative min-h-[430px] overflow-hidden rounded-[28px] border border-[#E0D4C6] bg-white/95 p-8 shadow-2xl shadow-[#2B2A2E]/10 backdrop-blur-xl sm:p-9">
+                        <div class="absolute -right-16 -top-16 h-36 w-36 rounded-full bg-[#C7A37E]/10">
+                        </div>
+                        <div class="absolute -bottom-20 -left-16 h-40 w-40 rounded-full bg-[#7C6A5B]/5">
+                        </div>
+                        <!-- ================== Form Wrapper================ -->
+
+                        <div class="relative flex min-h-[365px] flex-col justify-center">
+                            <div class="mb-7">
+                                <h1 class="text-3xl font-bold tracking-tight text-[#2B2A2E]">
+                                    Welcome back
+                                </h1>
+                                <p class="mt-2 text-sm text-[#7C6A5B]">
+                                    Sign in to access your account.
+                                </p>
+                            </div>
+                            <!-- Error Message -->
+                            {% if error %}
+                            <div class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                                <p class="text-sm text-red-600">
+                                    {{ error }}
+                                </p>
+                            </div>
+                            {% endif %}
+                            <form method="POST" class="space-y-6">
+                                {% csrf_token %}
+                                <!-- Email -->
+                                <div>
+                                    <label for="email" class="mb-2 block text-sm font-medium">
+                                        Email address
+                                    </label>
+                                    <input type="email" id="email" name="email" required autocomplete="email"
+                                        placeholder="you@example.com"
+                                        class="w-full rounded-xl border border-[#E0D4C6] bg-[#FDFCFB] px-4 py-3.5 text-sm outline-none transition placeholder:text-[#7C6A5B]/40 focus:border-[#C7A37E] focus:ring-4 focus:ring-[#C7A37E]/15">
+                                </div>
+                                <!-- Password -->
+                                <div>
+                                    <label for="password" class="mb-2 block text-sm font-medium">
+                                        Password
+                                    </label>
+                                    <div class="relative">
+                                        <input type="password" id="password" name="password" required
+                                            autocomplete="current-password" placeholder="Enter your password"
+                                            class="w-full rounded-xl border border-[#E0D4C6] bg-[#FDFCFB] px-4 py-3.5 pr-12 text-sm outline-none transition placeholder:text-[#7C6A5B]/40 focus:border-[#C7A37E] focus:ring-4 focus:ring-[#C7A37E]/15">
+                                        <!-- Password Toggle -->
+                                        <button type="button" onclick="togglePassword()"
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#7C6A5B] transition hover:bg-[#F4F0EA] hover:text-[#2B2A2E]">
+                                            <img id="passwordIcon" src="{% static 'icons/eye.svg' %}"
+                                                class="h-5 w-5 opacity-60" alt="Show password">
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Sign In Button -->
+                                <button type="submit"
+                                    class="w-full rounded-xl bg-[#7C6A5B] px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#7C6A5B]/15 transition hover:bg-[#69594D] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#C7A37E]/25">
+                                    Sign In
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <script>
+        function togglePassword() {
+            const input = document.getElementById("password");
+            const icon = document.getElementById("passwordIcon");
+            if (input.type === "password") {
+                input.type = "text";
+                icon.src = "{% static 'icons/eye-off.svg' %}";
+                icon.alt = "Hide password";
+            } else {
+                input.type = "password";
+                icon.src = "{% static 'icons/eye.svg' %}";
+                icon.alt = "Show password";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Users{% endblock %}
+{% block page_heading %}Users{% endblock %}
+{% block content %}
+<!-- ================User List================ -->
+<div class="mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold text-[#2B2A2E]">Users</h1>
+    {% if can_create %}
+    <!-- ================Add User Button================  -->
+    <button type="button" id="openUserModal"
+        class="inline-flex items-center gap-2 rounded-xl bg-[#7C6A5B] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#69594D] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]">
+        <img src="{% static 'icons/users.svg' %}" class="h-4 w-4 brightness-0 invert" alt="">
+        Add User
+    </button>
+    {% endif %}
+</div>
+<!-- ===================Search and Table================ -->
+<div class="mb-4 rounded-2xl border border-[#E0D4C6] bg-white p-3 shadow-sm">
+    <div class="relative max-w-md">
+        <img src="{% static 'icons/search.svg' %}" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50"
+            alt="">
+        <input type="text" id="userSearch" placeholder="Search by email or username..."
+            class="w-full rounded-xl border border-[#E0D4C6] bg-[#FDFCFB] py-2.5 pl-10 pr-4 text-sm text-[#2B2A2E] placeholder:text-[#7C6A5B]/50 focus:border-[#C7A37E] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]/20">
+    </div>
+</div>
+<div class="overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-[#E0D4C6] bg-[#F8F5F1] text-left">
+                    <th class="px-5 py-3.5 font-semibold text-[#7C6A5B]">User</th>
+                    <th class="px-5 py-3.5 font-semibold text-[#7C6A5B]">Username</th>
+                    <th class="px-5 py-3.5 font-semibold text-[#7C6A5B]">Role</th>
+                    <th class="px-5 py-3.5 font-semibold text-[#7C6A5B]">Status</th>
+                    <th class="px-5 py-3.5 text-right font-semibold text-[#7C6A5B]">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                {% for item in users_with_forms %}
+                <tr class="user-row border-b border-[#E0D4C6]/70 hover:bg-[#F8F5F1]"
+                    data-search="{{ item.user.email|lower }} {{ item.user.username|lower }}">
+                    <td class="px-5 py-3.5">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C7A37E]/25 text-sm font-semibold text-[#7C6A5B]">
+                                {{ item.user.username|first|upper }}
+                            </div>
+                            <span class="font-medium text-[#2B2A2E]">{{ item.user.email }}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5 text-[#2B2A2E]">
+                        {{ item.user.username }}
+                    </td>
+                    <td class="px-5 py-3.5">
+                        {% if item.user.role %}
+                        <span
+                            class="inline-flex rounded-full bg-[#C7A37E]/20 px-2.5 py-1 text-xs font-medium text-[#7C6A5B]">
+                            {{ item.user.role.name }}
+                        </span>
+                        {% else %}
+                        <span
+                            class="inline-flex rounded-full bg-[#F4F0EA] px-2.5 py-1 text-xs font-medium text-[#7C6A5B]">
+                            No role
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-5 py-3.5">
+                        {% if item.user.is_active %}
+                        <span
+                            class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            Active
+                        </span>
+                        {% else %}
+                        <span
+                            class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-600">
+                            <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                            Inactive
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-5 py-3.5">
+                        <div class="flex items-center justify-end gap-2">
+                            {% if can_edit %}
+                            <button type="button" onclick="openEditModal('editModal-{{ item.user.id }}')"
+                                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#E0D4C6] bg-white hover:border-[#C7A37E] hover:bg-[#C7A37E]/10"
+                                title="Edit">
+                                <img src="{% static 'icons/pencil.svg' %}" class="h-4 w-4 opacity-70" alt="Edit">
+                            </button>
+                            {% endif %}
+                            {% if can_delete and item.user != request.user %}
+                            <form method="post" action="{% url 'user_delete' item.user.id %}" class="inline"
+                                onsubmit="event.preventDefault(); openDeleteModal(this);">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-white hover:bg-red-50"
+                                    title="Delete">
+                                    <img src="{% static 'icons/trash-2.svg' %}" class="h-4 w-4 opacity-70" alt="Delete">
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-5 py-10 text-center text-sm text-[#7C6A5B]">
+                        No users found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include 'includes/pagination.html' %}
+
+</div>
+
+
+<!-- ====================Create User Modals================ -->
+{% if can_create %}
+<div id="userModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-[#2B2A2E]/50 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-[#E0D4C6] px-6 py-4">
+            <h2 class="text-lg font-semibold text-[#2B2A2E]">Add User</h2>
+            <button type="button" onclick="closeUserModal()"
+                class="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[#F4F0EA]">
+                <img src="{% static 'icons/x.svg' %}" class="h-5 w-5 opacity-70" alt="Close">
+            </button>
+        </div>
+        <form method="post" action="{% url 'user_create' %}" data-modal-form class="space-y-4 p-6">
+            {% csrf_token %}
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Email</label>
+                {{ create_form.email }}
+                <p data-form-error="email" class="mt-1 hidden text-xs text-red-500"></p>
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Username</label>
+                {{ create_form.username }}
+                <p data-form-error="username" class="mt-1 hidden text-xs text-red-500"></p>
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Password</label>
+                <div class="relative">
+                    {{ create_form.password }}
+                    <button type="button" onclick="togglePassword(this)"
+                        class="absolute right-3 top-1/2 -translate-y-1/2">
+                        <img src="{% static 'icons/eye.svg' %}" class="h-5 w-5 opacity-60" alt="Show">
+                    </button>
+                </div>
+                <p data-form-error="password" class="mt-1 hidden text-xs text-red-500"></p>
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Role</label>
+                {{ create_form.role }}
+                <p data-form-error="role" class="mt-1 hidden text-xs text-red-500"></p>
+            </div>
+            <div class="flex justify-end gap-3 border-t border-[#E0D4C6] pt-4">
+                <button type="button" onclick="closeUserModal()"
+                    class="rounded-xl border border-[#E0D4C6] px-4 py-2.5 text-sm font-medium text-[#7C6A5B] hover:bg-[#F4F0EA]">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="rounded-xl bg-[#7C6A5B] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#69594D]">
+                    Create User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- ====================Edit User Modal================ -->
+{% if can_edit %}
+{% for item in users_with_forms %}
+<div id="editModal-{{ item.user.id }}"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-[#2B2A2E]/50 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-[#E0D4C6] px-6 py-4">
+            <h2 class="text-lg font-semibold text-[#2B2A2E]">Edit User</h2>
+            <button type="button" onclick="closeEditModal('editModal-{{ item.user.id }}')"
+                class="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[#F4F0EA]">
+                <img src="{% static 'icons/x.svg' %}" class="h-5 w-5 opacity-70" alt="Close">
+            </button>
+        </div>
+        <form method="post" action="{% url 'user_edit' item.user.id %}" data-modal-form class="space-y-4 p-6">
+            {% csrf_token %}
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Username</label>
+                {{ item.edit_form.username }}
+                <p data-form-error="username" class="mt-1 hidden text-xs text-red-500"></p>
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Role</label>
+                {{ item.edit_form.role }}
+                <p data-form-error="role" class="mt-1 hidden text-xs text-red-500"></p>
+            </div>
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-[#E0D4C6] bg-[#F8F5F1] p-3">
+                {{ item.edit_form.is_active }}
+                <span class="text-sm font-medium text-[#2B2A2E]">Active account</span>
+            </label>
+            <div class="flex justify-end gap-3 border-t border-[#E0D4C6] pt-4">
+                <button type="button" onclick="closeEditModal('editModal-{{ item.user.id }}')"
+                    class="rounded-xl border border-[#E0D4C6] px-4 py-2.5 text-sm font-medium text-[#7C6A5B] hover:bg-[#F4F0EA]">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="rounded-xl bg-[#7C6A5B] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#69594D]">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- =======================Javascript for Modals and Form Handling======================== -->
+<script>
+    const userModal = document.getElementById("userModal");
+    const openUserModalButton = document.getElementById("openUserModal");
+    if (openUserModalButton) {
+        openUserModalButton.addEventListener("click", () => {
+            userModal.classList.remove("hidden");
+            userModal.classList.add("flex");
+            document.body.classList.add("overflow-hidden");
+        });
+    }
+    function closeUserModal() {
+        if (!userModal) return;
+        userModal.classList.add("hidden");
+        userModal.classList.remove("flex");
+        document.body.classList.remove("overflow-hidden");
+    }
+    function openEditModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.classList.add("overflow-hidden");
+    }
+    function closeEditModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.classList.remove("overflow-hidden");
+    }
+    function togglePassword(button) {
+        const input = document.getElementById("id_password");
+        if (!input) return;
+
+        const icon = button.querySelector("img");
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.src = "{% static 'icons/eye-off.svg' %}";
+        } else {
+            input.type = "password";
+            icon.src = "{% static 'icons/eye.svg' %}";
+        }
+    }
+
+    function clearFormErrors(form) {
+        form.querySelectorAll("[data-form-error]").forEach(error => {
+            error.textContent = "";
+            error.classList.add("hidden");
+        });
+
+        form.querySelectorAll(".border-red-400").forEach(input => {
+            input.classList.remove("border-red-400");
+        });
+    }
+
+    function showFormErrors(form, errors) {
+        clearFormErrors(form);
+
+        Object.keys(errors).forEach(field => {
+            if (!errors[field]?.length) return;
+
+            const input = form.querySelector(`[name="${field}"]`);
+            const error = form.querySelector(`[data-form-error="${field}"]`);
+
+            if (input) input.classList.add("border-red-400");
+
+            if (error) {
+                error.textContent = errors[field][0].message;
+                error.classList.remove("hidden");
+            }
+        });
+    }
+
+    document.querySelectorAll("form[data-modal-form]").forEach(form => {
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+            clearFormErrors(form);
+
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button?.textContent.trim();
+
+            if (button) {
+                button.disabled = true;
+                button.textContent = "Saving...";
+            }
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                const contentType = response.headers.get("content-type");
+
+                if (!contentType?.includes("application/json")) {
+                    window.location.href = response.url;
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    showFormErrors(form, data.errors || {});
+                    return;
+                }
+
+                window.location.href = data.redirect;
+
+            } catch (error) {
+                console.error(error);
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                }
+            }
+        });
+    });
+
+    const searchInput = document.getElementById("userSearch");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+
+            document.querySelectorAll(".user-row").forEach(row => {
+                row.classList.toggle(
+                    "hidden",
+                    !(row.dataset.search || "").includes(query)
+                );
+            });
+        });
+    }
+
+    if (userModal) {
+        userModal.addEventListener("click", event => {
+            if (event.target === userModal) closeUserModal();
+        });
+    }
+
+    document.querySelectorAll('[id^="editModal-"]').forEach(modal => {
+        modal.addEventListener("click", event => {
+            if (event.target === modal) closeEditModal(modal.id);
+        });
+    });
+
+    document.addEventListener("keydown", event => {
+        if (event.key !== "Escape") return;
+
+        if (userModal && !userModal.classList.contains("hidden")) {
+            closeUserModal();
+        }
+
+        document.querySelectorAll('[id^="editModal-"]').forEach(modal => {
+            if (!modal.classList.contains("hidden")) {
+                closeEditModal(modal.id);
+            }
+        });
+    });
+</script>
+
+{% endblock %}

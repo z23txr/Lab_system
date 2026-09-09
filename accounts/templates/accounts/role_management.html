@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Roles{% endblock %}
+{% block page_heading %}Roles{% endblock %}
+{% block content %}
+
+<!-- ===============================Roles Management======================== -->
+<div class="mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold text-[#2B2A2E]">
+        Roles
+    </h1>
+    {% if can_create %}
+    <!-- ============================Create Role Button======================== -->
+    <button type="button" onclick="openCreateRoleModal()"
+        class="inline-flex items-center gap-2 rounded-xl bg-[#7C6A5B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]">
+        <img src="{% static 'icons/key-round.svg' %}" class="h-4 w-4 brightness-0 invert" alt="">
+        Create Role
+    </button>
+    {% endif %}
+</div>
+
+<!-- ===============================Roles List======================== -->
+<div class="overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-sm">
+    <div class="border-b border-[#E0D4C6] bg-[#F8F5F1] px-5 py-3.5">
+        <h2 class="text-sm font-semibold text-[#7C6A5B]">
+            Existing Roles
+        </h2>
+    </div>
+    {% if roles %}
+    <div class="divide-y divide-[#E0D4C6]/70">
+        {% for role in page_obj %}
+        <div class="flex items-center justify-between px-5 py-4 transition hover:bg-[#F8F5F1]">
+            <div class="flex min-w-0 items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C7A37E]/25">
+                    <img src="{% static 'icons/shield-check.svg' %}" class="h-4 w-4" alt="">
+                </div>
+                <div class="min-w-0">
+                    <h3 class="text-sm font-medium text-[#2B2A2E]">
+                        {{ role.name }}
+                    </h3>
+                    {% if role.description %}
+                    <p class="mt-0.5 truncate text-xs text-[#7C6A5B]">
+                        {{ role.description }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="ml-4 flex shrink-0 items-center justify-end gap-2">
+                <!-- ===============================Edit Role Button======================== -->
+                {% if can_edit %}
+                <button type="button" onclick="openEditRoleModal(
+                        '{{ role.id }}',
+                        '{{ role.name|escapejs }}',
+                        '{{ role.description|default:''|escapejs }}'
+                    )"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#E0D4C6] bg-white transition hover:border-[#C7A37E] hover:bg-[#C7A37E]/10"
+                    title="Edit">
+                    <img src="{% static 'icons/pencil.svg' %}" class="h-4 w-4 opacity-70" alt="Edit">
+                </button>
+                {% endif %}
+                <!-- ================================Delete Role Button======================== -->
+                {% if can_delete %}
+                <form method="post" action="{% url 'role_delete' role.id %}" class="inline"
+                    onsubmit="event.preventDefault(); openDeleteModal(this);">
+                    {% csrf_token %}
+
+                    <button type="submit" class="inline-flex h-9 w-9 items-center justify-center
+               rounded-lg border border-red-100 bg-white
+               transition hover:bg-red-50" title="Delete">
+                        <img src="{% static 'icons/trash-2.svg' %}" class="h-4 w-4 opacity-70" alt="Delete">
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% include 'includes/pagination.html' %}
+
+    {% else %}
+    <!-- ================================No Roles Found Message======================== -->
+    <div class="px-5 py-10 text-center">
+        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#C7A37E]/20">
+            <img src="{% static 'icons/shield-check.svg' %}" class="h-5 w-5" alt="">
+        </div>
+
+        <h3 class="mt-3 text-sm font-semibold text-[#2B2A2E]">
+            No roles found.
+        </h3>
+
+        {% if can_create %}
+        <button type="button" onclick="openCreateRoleModal()"
+            class="mt-4 rounded-xl bg-[#7C6A5B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D]">
+            Create Role
+        </button>
+        {% endif %}
+
+    </div>
+    {% endif %}
+</div>
+
+<!-- ==========================Create Role Modals======================== -->
+{% if can_create %}
+<div id="createRoleModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-[#2B2A2E]/50 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-[#E0D4C6] px-6 py-4">
+            <h2 class="text-lg font-semibold text-[#2B2A2E]">
+                Create Role
+            </h2>
+            <button type="button" onclick="closeCreateRoleModal()"
+                class="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[#F4F0EA]">
+                <img src="{% static 'icons/x.svg' %}" class="h-5 w-5 opacity-70" alt="Close">
+            </button>
+        </div>
+        <form method="post" class="space-y-4 p-6">
+            {% csrf_token %}
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">
+                    Role Name
+                </label>
+                <input type="text" name="name" required placeholder="e.g. Manager"
+                    class="w-full rounded-xl border border-[#E0D4C6] bg-[#FDFCFB] px-3.5 py-2.5 text-sm text-[#2B2A2E] placeholder:text-[#7C6A5B]/50 focus:border-[#C7A37E] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]/20">
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">
+                    Description
+                </label>
+                <input type="text" name="description" placeholder="What can this role do?"
+                    class="w-full rounded-xl border border-[#E0D4C6] bg-[#FDFCFB] px-3.5 py-2.5 text-sm text-[#2B2A2E] placeholder:text-[#7C6A5B]/50 focus:border-[#C7A37E] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]/20">
+            </div>
+            <div class="flex justify-end gap-3 border-t border-[#E0D4C6] pt-4">
+                <button type="button" onclick="closeCreateRoleModal()"
+                    class="rounded-xl border border-[#E0D4C6] px-4 py-2.5 text-sm font-medium text-[#7C6A5B] transition hover:bg-[#F4F0EA]">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="rounded-xl bg-[#7C6A5B] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D]">
+                    Create Role
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% if can_edit %}
+<!-- ========================Edit Role Modal========================  -->
+<div id="editRoleModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-[#2B2A2E]/50 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-[#E0D4C6] px-6 py-4">
+            <h2 class="text-lg font-semibold text-[#2B2A2E]">
+                Edit Role
+            </h2>
+            <button type="button" onclick="closeEditRoleModal()"
+                class="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[#F4F0EA]">
+                <img src="{% static 'icons/x.svg' %}" class="h-5 w-5 opacity-70" alt="Close">
+            </button>
+        </div>
+        <form id="editRoleForm" method="post" class="space-y-4 p-6">
+            {% csrf_token %}
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">
+                    Role Name
+                </label>
+                <input id="editRoleName" type="text" name="name" required
+                    class="w-full rounded-xl border border-[#E0D4C6] bg-[#FDFCFB] px-3.5 py-2.5 text-sm text-[#2B2A2E] focus:border-[#C7A37E] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]/20">
+            </div>
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">
+                    Description
+                </label>
+                <input id="editRoleDescription" type="text" name="description"
+                    class="w-full rounded-xl border border-[#E0D4C6] bg-[#FDFCFB] px-3.5 py-2.5 text-sm text-[#2B2A2E] focus:border-[#C7A37E] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]/20">
+            </div>
+            <div class="flex justify-end gap-3 border-t border-[#E0D4C6] pt-4">
+                <button type="button" onclick="closeEditRoleModal()"
+                    class="rounded-xl border border-[#E0D4C6] px-4 py-2.5 text-sm font-medium text-[#7C6A5B] transition hover:bg-[#F4F0EA]">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="rounded-xl bg-[#7C6A5B] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D]">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+
+
+<script>
+    function openCreateRoleModal() {
+        const modal = document.getElementById("createRoleModal");
+        if (!modal) return;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.classList.add("overflow-hidden");
+    }
+
+    function closeCreateRoleModal() {
+        const modal = document.getElementById("createRoleModal");
+        if (!modal) return;
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.classList.remove("overflow-hidden");
+    }
+
+    function openEditRoleModal(id, name, description) {
+        const modal = document.getElementById("editRoleModal");
+        if (!modal) return;
+        document.getElementById("editRoleName").value = name;
+        document.getElementById("editRoleDescription").value = description;
+        document.getElementById("editRoleForm").action =
+            `/super-admin/roles/edit/${id}/`;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.classList.add("overflow-hidden");
+    }
+
+    function closeEditRoleModal() {
+        const modal = document.getElementById("editRoleModal");
+        if (!modal) return;
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.classList.remove("overflow-hidden");
+    }
+
+    const createModal = document.getElementById("createRoleModal");
+    if (createModal) {
+        createModal.addEventListener("click", event => {
+            if (event.target === createModal) {
+                closeCreateRoleModal();
+            }
+        });
+    }
+    const editModal = document.getElementById("editRoleModal");
+    if (editModal) {
+        editModal.addEventListener("click", event => {
+            if (event.target === editModal) {
+                closeEditRoleModal();
+            }
+        });
+    }
+
+    document.addEventListener("keydown", event => {
+        if (event.key !== "Escape") return;
+        if (createModal && !createModal.classList.contains("hidden")) {
+            closeCreateRoleModal();
+        }
+        if (editModal && !editModal.classList.contains("hidden")) {
+            closeEditRoleModal();
+        }
+
+    });
+</script>
+{% endblock %}

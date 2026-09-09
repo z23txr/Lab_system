@@ -1,0 +1,142 @@
+<!-- ==================== Common Delete Confirmation Modal ==================== -->
+{% load static %}
+<div
+    id="deleteConfirmModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center
+           bg-[#2B2A2E]/50 px-4 py-6 backdrop-blur-sm"
+>
+    <div
+        class="w-full max-w-md overflow-hidden rounded-2xl
+               border border-[#E0D4C6] bg-white shadow-2xl"
+    >
+        <div
+            class="flex items-center justify-between
+                   border-b border-[#E0D4C6] px-6 py-4"
+        >
+            <h2 class="text-lg font-semibold text-[#2B2A2E]">
+                Confirm Delete
+            </h2>
+            <button
+                type="button"
+                onclick="closeDeleteModal()"
+                class="flex h-8 w-8 items-center justify-center
+                       rounded-lg hover:bg-[#F4F0EA]"
+            >
+                <img
+                    src="{% static 'icons/x.svg' %}"
+                    class="h-5 w-5 opacity-70"
+                    alt="Close"
+                >
+            </button>
+        </div>
+        <div class="px-6 py-5">
+            <div class="flex items-start gap-3">
+                <div
+                    class="flex h-10 w-10 shrink-0 items-center
+                           justify-center rounded-full bg-red-50">
+                    <img
+                        src="{% static 'icons/trash-2.svg' %}"
+                        class="h-5 w-5 opacity-70"
+                        alt=""
+                    >
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-[#2B2A2E]">
+                        Are you sure?
+                    </h3>
+                    <p class="mt-1 text-sm text-[#7C6A5B]">
+                        This action cannot be undone.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div
+            class="flex justify-end gap-3
+                   border-t border-[#E0D4C6]
+                   bg-[#F8F5F1] px-6 py-4"
+        >
+            <button
+                type="button"
+                onclick="closeDeleteModal()"
+                class="rounded-xl border border-[#E0D4C6]
+                       bg-white px-4 py-2.5 text-sm font-medium
+                       text-[#7C6A5B] hover:bg-[#F4F0EA]"
+            >
+                Cancel
+            </button>
+            <button
+                type="button"
+                id="confirmDeleteButton"
+                class="rounded-xl bg-red-600 px-5 py-2.5
+                       text-sm font-medium text-white
+                       hover:bg-red-700"
+            >
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let deleteForm = null;
+
+function openDeleteModal(form) {
+    const modal = document.getElementById("deleteConfirmModal");
+    if (!modal) return;
+    deleteForm = form;
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.body.classList.add("overflow-hidden");
+}
+function closeDeleteModal() {
+    const modal = document.getElementById("deleteConfirmModal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    document.body.classList.remove("overflow-hidden");
+    deleteForm = null;
+}
+const confirmDeleteButton =
+    document.getElementById("confirmDeleteButton");
+if (confirmDeleteButton) {
+    confirmDeleteButton.addEventListener("click", function () {
+        if (!deleteForm) return;
+        deleteForm.submit();
+    });
+}
+const deleteConfirmModal =
+    document.getElementById("deleteConfirmModal");
+if (deleteConfirmModal) {
+
+    deleteConfirmModal.addEventListener("click", function (event) {
+
+        if (event.target === deleteConfirmModal) {
+
+            closeDeleteModal();
+
+        }
+
+    });
+
+}
+
+
+document.addEventListener("keydown", function (event) {
+
+    if (event.key !== "Escape") return;
+
+    const modal =
+        document.getElementById("deleteConfirmModal");
+
+    if (
+        modal &&
+        !modal.classList.contains("hidden")
+    ) {
+
+        closeDeleteModal();
+
+    }
+
+});
+
+</script>

@@ -1,0 +1,513 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Textile Lab{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    <style>
+        .sidebar-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sidebar-scroll {
+            scrollbar-width: none;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="min-h-screen bg-[#F4F0EA] text-[#2B2A2E]">
+    <div class="flex min-h-screen">
+        <!-- ====================Sidebar====================== -->
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-[#2B2A2E] text-white transition-all duration-300">
+
+            <div class="flex h-16 shrink-0 items-center border-b border-white/10 px-4">
+
+                <div id="brand" class="flex min-w-0 flex-1 items-center gap-3">
+
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#C7A37E]">
+                        <img src="{% static 'icons/store.svg' %}" class="h-5 w-5 brightness-0 invert" alt="">
+                    </div>
+
+                    <div id="brandText" class="min-w-0">
+                        <h1 class="truncate text-sm font-semibold text-white">
+                            Textile Lab
+                        </h1>
+
+                    </div>
+
+                </div>
+
+                <button type="button" onclick="toggleSidebar()"
+                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white/55 transition hover:bg-white/10 hover:text-white">
+                    <svg id="sidebarToggleIcon" class="h-4 w-4 transition-transform duration-300" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 6l-6 6 6 6" />
+                    </svg>
+                </button>
+
+            </div>
+
+            <!-- ================Navigation====================== -->
+            <nav class="sidebar-scroll flex-1 overflow-y-auto px-3 py-8">
+
+                {% if can_view_dashboard %}
+                <a href="{% url 'dashboard' %}" title="Dashboard" class="mb-1 flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition
+                {% if request.resolver_match.url_name == 'dashboard' %}
+                    bg-[#C7A37E] text-[#2B2A2E]
+                {% else %}
+                    text-white/65 hover:bg-white/10 hover:text-white
+                {% endif %}">
+                    <img src="{% static 'icons/layout-dashboard.svg' %}"
+                        class="nav-icon h-[18px] w-[18px] shrink-0 brightness-0 invert" alt="">
+                    <span class="nav-text whitespace-nowrap">Dashboard</span>
+                </a>
+                {% endif %}
+
+                <!-- ==================User Management======================== -->
+                {% if can_view_users or can_view_roles or can_view_permissions %}
+                <div class="mt-4">
+
+                    <button type="button" onclick="toggleMenu('userManagementMenu', 'userManagementArrow')"
+                        title="User Management"
+                        class="nav-button flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <img src="{% static 'icons/users.svg' %}"
+                                class="nav-icon h-[18px] w-[18px] shrink-0 brightness-0 invert" alt="">
+                            <span class="nav-text whitespace-nowrap">User Management</span>
+                        </div>
+
+                        <svg id="userManagementArrow"
+                            class="nav-arrow h-4 w-4 shrink-0 text-white/40 transition-transform duration-200"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- ===============User Management Submenu======================== -->
+                    <div id="userManagementMenu"
+                        class="nav-submenu ml-4 hidden space-y-1 border-l border-white/10 pl-3">
+
+                        {% if can_view_users %}
+                        <a href="{% url 'user_list' %}" class="block truncate rounded-lg px-3 py-2 text-sm transition
+                        {% if request.resolver_match.url_name == 'user_list' %}
+                            bg-[#C7A37E]/15 text-[#D8B892]
+                        {% else %}
+                            text-white/50 hover:bg-white/5 hover:text-white
+                        {% endif %}">
+                            Users
+                        </a>
+                        {% endif %}
+
+                        {% if can_view_roles %}
+                        <a href="{% url 'role_management' %}" class="block truncate rounded-lg px-3 py-2 text-sm transition
+                        {% if request.resolver_match.url_name == 'role_management' %}
+                            bg-[#C7A37E]/15 text-[#D8B892]
+                        {% else %}
+                            text-white/50 hover:bg-white/5 hover:text-white
+                        {% endif %}">
+                            Roles
+                        </a>
+                        {% endif %}
+
+
+                        {% if can_view_permissions %}
+                        <a href="{% url 'permission_management' %}" class="block truncate rounded-lg px-3 py-2 text-sm transition
+                        {% if request.resolver_match.url_name == 'permission_management' %}
+                            bg-[#C7A37E]/15 text-[#D8B892]
+                        {% else %}
+                            text-white/50 hover:bg-white/5 hover:text-white
+                        {% endif %}">
+                            Permissions
+                        </a>
+                        {% endif %}
+                        {% if can_view_modules %}
+                        <a href="{% url 'module_management' %}" class="block truncate rounded-lg px-3 py-2 text-sm transition
+                        {% if request.resolver_match.url_name == 'module_management' %}
+                            bg-[#C7A37E]/15 text-[#D8B892]
+                        {% else %}
+                            text-white/50 hover:bg-white/5 hover:text-white
+                        {% endif %}">
+                            Modules
+                        </a>
+                        {% endif %}
+
+                         {% if can_view_audit_log %}
+                        <a href="{% url 'audit_log_view' %}" class="block truncate rounded-lg px-3 py-2 text-sm transition
+                        {% if request.resolver_match.url_name == 'audit_log_view' %}
+                            bg-[#C7A37E]/15 text-[#D8B892]
+                        {% else %}
+                            text-white/50 hover:bg-white/5 hover:text-white
+                        {% endif %}">
+                            Audit Log
+                        </a>
+                        {% endif %}
+
+
+                    </div>
+
+                </div>
+                {% endif %}
+
+                <!-- =================Test Development======================== -->
+                <div class="mt-2">
+
+                    <button type="button" onclick="toggleMenu('testDevelopmentMenu', 'testDevelopmentArrow')"
+                        title="Test Development"
+                        class="nav-button flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <img src="{% static 'icons/shield-check.svg' %}"
+                                class="nav-icon h-[18px] w-[18px] shrink-0 brightness-0 invert" alt="">
+                            <span class="nav-text whitespace-nowrap">Test Development</span>
+                        </div>
+
+                        <svg id="testDevelopmentArrow"
+                            class="nav-arrow h-4 w-4 shrink-0 text-white/40 transition-transform duration-200"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- ============================Test Development Submenu======================== -->
+                    <div id="testDevelopmentMenu"
+                        class="nav-submenu ml-4 hidden space-y-1 border-l border-white/10 pl-3">
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Test Groups
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Tests
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- ========================Customer Management======================== -->
+                <div class="mt-2">
+
+                    <button type="button" onclick="toggleMenu('customerManagementMenu', 'customerManagementArrow')"
+                        title="Customer Management"
+                        class="nav-button flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <img src="{% static 'icons/users.svg' %}"
+                                class="nav-icon h-[18px] w-[18px] shrink-0 brightness-0 invert" alt="">
+                            <span class="nav-text whitespace-nowrap">Customer Management</span>
+                        </div>
+
+                        <svg id="customerManagementArrow"
+                            class="nav-arrow h-4 w-4 shrink-0 text-white/40 transition-transform duration-200"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- =========================Customer Management Submenu======================== -->
+                    <div id="customerManagementMenu"
+                        class="nav-submenu ml-4 hidden space-y-1 border-l border-white/10 pl-3">
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Customers
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Customer Contacts
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Customer Rates
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Parent Companies
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Customer Revenue
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- =======================Jobs======================== -->
+                <div class="mt-2">
+
+                    <button type="button" onclick="toggleMenu('jobsMenu', 'jobsArrow')" title="Jobs"
+                        class="nav-button flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <img src="{% static 'icons/layout-dashboard.svg' %}"
+                                class="nav-icon h-[18px] w-[18px] shrink-0 brightness-0 invert" alt="">
+                            <span class="nav-text whitespace-nowrap">Jobs</span>
+                        </div>
+
+                        <svg id="jobsArrow"
+                            class="nav-arrow h-4 w-4 shrink-0 text-white/40 transition-transform duration-200"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- ========================jobs Submenu======================== -->
+                    <div id="jobsMenu" class="nav-submenu ml-4 hidden space-y-1 border-l border-white/10 pl-3">
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Quotations
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            TRFs
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Samples
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- =============================Testing ================================= -->
+                <div class="mt-2">
+
+                    <button type="button" onclick="toggleMenu('testingMenu', 'testingArrow')" title="Testing"
+                        class="nav-button flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <img src="{% static 'icons/shield-check.svg' %}"
+                                class="nav-icon h-[18px] w-[18px] shrink-0 brightness-0 invert" alt="">
+                            <span class="nav-text whitespace-nowrap">Testing</span>
+                        </div>
+
+                        <svg id="testingArrow"
+                            class="nav-arrow h-4 w-4 shrink-0 text-white/40 transition-transform duration-200"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- =====================================Testing Submenu======================== -->
+                    <div id="testingMenu" class="nav-submenu ml-4 hidden space-y-1 border-l border-white/10 pl-3">
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Testing Jobs
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Job Cards
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- ===============================Reports & Analytics======================== -->
+                <div class="mt-2">
+
+                    <button type="button" onclick="toggleMenu('reportsMenu', 'reportsArrow')"
+                        title="Reports & Analytics"
+                        class="nav-button flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <img src="{% static 'icons/layout-dashboard.svg' %}"
+                                class="nav-icon h-[18px] w-[18px] shrink-0 brightness-0 invert" alt="">
+                            <span class="nav-text whitespace-nowrap">Reports & Analytics</span>
+                        </div>
+
+                        <svg id="reportsArrow"
+                            class="nav-arrow h-4 w-4 shrink-0 text-white/40 transition-transform duration-200"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- ===============================Reports & Analytics Submenu======================== -->
+                    <div id="reportsMenu" class="nav-submenu ml-4 hidden space-y-1 border-l border-white/10 pl-3">
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Overview
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Booking
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Revenue
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Delays
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            On-Time Delivery
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            Lab Statistics
+                        </a>
+                        <a href="#"
+                            class="block truncate rounded-lg px-3 py-2 text-sm text-white/50 hover:bg-white/5 hover:text-white">
+                            CSR Statistics
+                        </a>
+                    </div>
+
+                </div>
+
+
+
+            </nav>
+
+            <!-- ====================Logout========================  -->
+            <div class="shrink-0 border-t border-white/10 p-3">
+
+                <a href="{% url 'logout' %}" title="Logout"
+                    class="flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium text-white/55 transition hover:bg-white/5 hover:text-white">
+                    <img src="{% static 'icons/log-out.svg' %}" class="h-[18px] w-[18px] shrink-0 brightness-0 invert"
+                        alt="">
+
+                    <span class="nav-text whitespace-nowrap">
+                        Logout
+                    </span>
+                </a>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- ============================Main Content======================== -->
+        <main id="mainContent" class="ml-64 min-h-screen flex-1 transition-all duration-300">
+
+            <!-- ============================Header======================== -->
+            <header
+                class="sticky top-0 z-30 flex h-16 items-center justify-end border-b border-[#E0D4C6] bg-[#F4F0EA]/95 px-8 backdrop-blur">
+
+                <a href="#"
+                    class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[#2B2A2E] transition hover:bg-[#F4F0EA]">
+
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#C7A37E] text-[#2B2A2E]">
+                        <img src="{% static 'icons/user.svg' %}" class="h-4 w-4 brightness-0" alt="">
+                    </span>
+
+                    <span>Profile</span>
+                </a>
+
+            </header>
+
+            <!-- =============================Content Area======================== -->
+            <section class="p-8">
+                {% block content %}
+                {% endblock %}
+            </section>
+
+        </main>
+
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        function toggleMenu(menuId, arrowId) {
+            const menu = document.getElementById(menuId);
+            const arrow = document.getElementById(arrowId);
+
+            if (!menu || !arrow) return;
+
+            menu.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-90');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const brandText = document.getElementById('brandText');
+
+            const navTexts = document.querySelectorAll('.nav-text');
+            const navButtons = document.querySelectorAll('.nav-button');
+            const navArrows = document.querySelectorAll('.nav-arrow');
+            const submenus = document.querySelectorAll('.nav-submenu');
+            const toggleIcon = document.getElementById('sidebarToggleIcon');
+
+            const collapsed = sidebar.classList.contains('w-20');
+
+            if (collapsed) {
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-64');
+
+                mainContent.classList.remove('ml-20');
+                mainContent.classList.add('ml-64');
+
+                brandText.classList.remove('hidden');
+
+
+                navTexts.forEach(item => item.classList.remove('hidden'));
+
+                navButtons.forEach(item => {
+                    item.classList.remove('justify-center');
+                });
+
+                navArrows.forEach(item => {
+                    item.classList.remove('hidden');
+                });
+
+                toggleIcon.classList.remove('rotate-180');
+
+            } else {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-20');
+
+                mainContent.classList.remove('ml-64');
+                mainContent.classList.add('ml-20');
+
+                brandText.classList.add('hidden');
+
+
+                navTexts.forEach(item => item.classList.add('hidden'));
+
+                navButtons.forEach(item => {
+                    item.classList.add('justify-center');
+                });
+
+                navArrows.forEach(item => {
+                    item.classList.add('hidden');
+                });
+
+                submenus.forEach(item => {
+                    item.classList.add('hidden');
+                });
+
+                toggleIcon.classList.add('rotate-180');
+            }
+        }
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const currentPage = "{{ request.resolver_match.url_name }}";
+
+    const userManagementPages = [
+        'user_list',
+        'role_management',
+        'permission_management',
+        'module_management',
+        'audit_log_view'
+    ];
+
+    if (userManagementPages.includes(currentPage)) {
+        const menu = document.getElementById('userManagementMenu');
+        const arrow = document.getElementById('userManagementArrow');
+
+        if (menu && arrow) {
+            menu.classList.remove('hidden');
+            arrow.classList.add('rotate-90');
+        }
+    }
+
+});
+    </script>
+    {% include 'includes/delete_modal.html' %}
+</body>
+
+</html>
