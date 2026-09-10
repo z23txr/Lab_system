@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Labs{% endblock %}
+{% block page_heading %}Labs{% endblock %}
+{% block content %}
+
+<div class="mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold text-[#2B2A2E]">Labs</h1>
+    <button type="button" onclick="openCreateLabModal()"
+        class="inline-flex items-center gap-2 rounded-xl bg-[#7C6A5B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]">
+        <img src="{% static 'icons/plus.svg' %}" class="h-4 w-4 brightness-0 invert" alt="">
+        Add Lab
+    </button>
+</div>
+
+<!-- =================== Search =================== -->
+<div class="mb-4">
+    <input type="text" id="labSearch" placeholder="Search labs"
+        class="w-full rounded-xl border border-[#E0D4C6] bg-white px-4 py-2.5 text-sm text-[#2B2A2E] placeholder:text-[#7C6A5B]/50 focus:border-[#C7A37E] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]/20">
+</div>
+
+<!-- =================== Lab List =================== -->
+<div class="overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-sm">
+    <div class="border-b border-[#E0D4C6] bg-[#F8F5F1] px-5 py-3.5">
+        <h2 class="text-sm font-semibold text-[#7C6A5B]">Lab List</h2>
+    </div>
+    {% if labs %}
+    <div class="divide-y divide-[#E0D4C6]/70" id="labTableBody">
+        {% for lab in labs %}
+        <div class="lab-row flex items-center justify-between px-5 py-4 hover:bg-[#FDFCFB]"
+            data-search="{{ lab.name|lower }}">
+            <span class="text-sm font-medium text-[#2B2A2E]">{{ lab.name }}</span>
+            <div class="flex items-center gap-1">
+                <button type="button" onclick="openEditLabModal('{{ lab.id }}', '{{ lab.name|escapejs }}')"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#E0D4C6] bg-white transition hover:border-[#C7A37E] hover:bg-[#C7A37E]/10"
+                    title="Edit">
+                    <img src="{% static 'icons/pencil.svg' %}" class="h-4 w-4 opacity-70" alt="Edit">
+                </button>
+                <form method="post" action="{% url 'lab_delete' lab.id %}" class="inline"
+                    onsubmit="event.preventDefault(); openDeleteModal(this);">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-white transition hover:bg-red-50"
+                        title="Delete">
+                        <img src="{% static 'icons/trash-2.svg' %}" class="h-4 w-4 opacity-70" alt="Delete">
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="px-5 py-10 text-center">
+        <h3 class="text-sm font-semibold text-[#2B2A2E]">No labs found.</h3>
+        <button type="button" onclick="openCreateLabModal()"
+            class="mt-4 rounded-xl bg-[#7C6A5B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D]">
+            Add Lab
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- =================== Create Lab Modal =================== -->
+<div id="createLabModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-[#2B2A2E]/50 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-[#E0D4C6] px-6 py-4">
+            <h2 class="text-lg font-semibold text-[#2B2A2E]">Add Lab</h2>
+            <button type="button" onclick="closeCreateLabModal()"
+                class="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[#F4F0EA]">
+                <img src="{% static 'icons/x.svg' %}" class="h-5 w-5 opacity-70" alt="Close">
+            </button>
+        </div>
+        <form id="createLabForm" method="post" action="{% url 'lab_create' %}" class="space-y-4 p-6"> {% csrf_token %}
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Lab Name</label>
+                {{ form.name }}
+                <p data-form-error="create-name" class="mt-1 hidden text-xs text-red-600"></p>
+            </div>
+            <div id="createLabGeneralError"
+                class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"></div>
+            <div class="flex justify-end gap-3 border-t border-[#E0D4C6] pt-4">
+                <button type="button" onclick="closeCreateLabModal()"
+                    class="rounded-xl border border-[#E0D4C6] px-4 py-2.5 text-sm font-medium text-[#7C6A5B] transition hover:bg-[#F4F0EA]">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="rounded-xl bg-[#7C6A5B] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D]">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- =================== Edit Lab Modal =================== -->
+<div id="editLabModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-[#2B2A2E]/50 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-[#E0D4C6] px-6 py-4">
+            <h2 class="text-lg font-semibold text-[#2B2A2E]">Edit Lab</h2>
+            <button type="button" onclick="closeEditLabModal()"
+                class="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[#F4F0EA]">
+                <img src="{% static 'icons/x.svg' %}" class="h-5 w-5 opacity-70" alt="Close">
+            </button>
+        </div>
+        <form id="editLabForm" method="post" class="space-y-4 p-6">
+            {% csrf_token %}
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Lab Name</label>
+                <input id="editLabName" type="text" name="name" required
+                    class="w-full px-3.5 py-2.5 border border-[#E0D4C6] rounded-xl bg-[#FDFCFB] text-sm text-[#2B2A2E] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]/30 focus:border-[#C7A37E] transition">
+                <p data-form-error="edit-name" class="mt-1 hidden text-xs text-red-600"></p>
+            </div>
+            <div id="editLabGeneralError"
+                class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"></div>
+            <div class="flex justify-end gap-3 border-t border-[#E0D4C6] pt-4">
+                <button type="button" onclick="closeEditLabModal()"
+                    class="rounded-xl border border-[#E0D4C6] px-4 py-2.5 text-sm font-medium text-[#7C6A5B] transition hover:bg-[#F4F0EA]">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="rounded-xl bg-[#7C6A5B] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D]">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCreateLabModal() {
+        clearErrors("createLabGeneralError", ["create-name"]);
+        document.getElementById("createLabForm").reset();
+        toggleModal("createLabModal", true);
+    }
+    function closeCreateLabModal() { toggleModal("createLabModal", false); }
+
+    function openEditLabModal(id, name) {
+        clearErrors("editLabGeneralError", ["edit-name"]);
+        document.getElementById("editLabName").value = name;
+        document.getElementById("editLabForm").action = `/lab/labs/edit/${id}/`;
+        toggleModal("editLabModal", true);
+    }
+    function closeEditLabModal() { toggleModal("editLabModal", false); }
+
+    function toggleModal(id, show) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.toggle("hidden", !show);
+        modal.classList.toggle("flex", show);
+        document.body.classList.toggle("overflow-hidden", show);
+    }
+
+    function clearErrors(generalId, fieldKeys) {
+        fieldKeys.forEach(key => {
+            const el = document.querySelector(`[data-form-error="${key}"]`);
+            if (el) { el.textContent = ""; el.classList.add("hidden"); }
+        });
+        const general = document.getElementById(generalId);
+        if (general) { general.textContent = ""; general.classList.add("hidden"); }
+    }
+
+    ["createLabModal", "editLabModal"].forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) modal.addEventListener("click", e => { if (e.target === modal) toggleModal(id, false); });
+    });
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+            toggleModal("createLabModal", false);
+            toggleModal("editLabModal", false);
+        }
+    });
+
+    document.getElementById("createLabForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        submitLabForm(this, "createLabGeneralError", "create-name", closeCreateLabModal);
+    });
+
+    document.getElementById("editLabForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        submitLabForm(this, "editLabGeneralError", "edit-name", closeEditLabModal);
+    });
+
+    function submitLabForm(form, generalErrorId, fieldKey, onSuccessClose) {
+        clearErrors(generalErrorId, [fieldKey]);
+        const formData = new FormData(form);
+        fetch(form.getAttribute("action"), {
+            method: "POST",
+            body: formData,
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+            .then(res => res.json().then(data => ({ ok: res.ok, data })))
+            .then(({ ok, data }) => {
+                if (!ok || !data.success) {
+                    const errors = data.errors || {};
+                    const generalEl = document.getElementById(generalErrorId);
+                    if (errors.name) {
+                        const el = document.querySelector(`[data-form-error="${fieldKey}"]`);
+                        if (el) {
+                            el.textContent = errors.name.map(e => e.message).join(" ");
+                            el.classList.remove("hidden");
+                        }
+                    } else if (generalEl) {
+                        generalEl.textContent = data.message || "Something went wrong.";
+                        generalEl.classList.remove("hidden");
+                    }
+                    return;
+                }
+                onSuccessClose();
+                window.location.reload();
+            })
+            .catch(() => {
+                const generalEl = document.getElementById(generalErrorId);
+                if (generalEl) {
+                    generalEl.textContent = "Something went wrong. Please try again.";
+                    generalEl.classList.remove("hidden");
+                }
+            });
+    }
+
+    const labSearch = document.getElementById("labSearch");
+    if (labSearch) {
+        labSearch.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+            document.querySelectorAll(".lab-row").forEach(row => {
+                row.classList.toggle("hidden", !(row.dataset.search || "").includes(query));
+            });
+        });
+    }
+</script>
+
+{% endblock %}

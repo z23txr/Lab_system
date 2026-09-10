@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Designations{% endblock %}
+{% block page_heading %}Designations{% endblock %}
+{% block content %}
+
+<div class="mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold text-[#2B2A2E]">Designations</h1>
+    <button type="button" onclick="openCreateDesignationModal()"
+        class="inline-flex items-center gap-2 rounded-xl bg-[#7C6A5B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]">
+        <img src="{% static 'icons/plus.svg' %}" class="h-4 w-4 brightness-0 invert" alt="">
+        Add Designation
+    </button>
+</div>
+
+<!-- =================== Search =================== -->
+<div class="mb-4">
+    <input type="text" id="designationSearch" placeholder="Search designations"
+        class="w-full rounded-xl border border-[#E0D4C6] bg-white px-4 py-2.5 text-sm text-[#2B2A2E] placeholder:text-[#7C6A5B]/50 focus:border-[#C7A37E] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]/20">
+</div>
+
+<!-- =================== Designation List =================== -->
+<div class="overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-sm">
+    <div class="border-b border-[#E0D4C6] bg-[#F8F5F1] px-5 py-3.5">
+        <h2 class="text-sm font-semibold text-[#7C6A5B]">Designation List</h2>
+    </div>
+    {% if designations %}
+    <div class="divide-y divide-[#E0D4C6]/70" id="designationTableBody">
+        {% for designation in designations %}
+        <div class="designation-row flex items-center justify-between px-5 py-4 hover:bg-[#FDFCFB]"
+            data-search="{{ designation.name|lower }}">
+            <span class="text-sm font-medium text-[#2B2A2E]">{{ designation.name }}</span>
+            <div class="flex items-center gap-1">
+                <button type="button" onclick="openEditDesignationModal('{{ designation.id }}', '{{ designation.name|escapejs }}')"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#E0D4C6] bg-white transition hover:border-[#C7A37E] hover:bg-[#C7A37E]/10"
+                    title="Edit">
+                    <img src="{% static 'icons/pencil.svg' %}" class="h-4 w-4 opacity-70" alt="Edit">
+                </button>
+                <form method="post" action="{% url 'designation_delete' designation.id %}" class="inline"
+                    onsubmit="event.preventDefault(); openDeleteModal(this);">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-white transition hover:bg-red-50"
+                        title="Delete">
+                        <img src="{% static 'icons/trash-2.svg' %}" class="h-4 w-4 opacity-70" alt="Delete">
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="px-5 py-10 text-center">
+        <h3 class="text-sm font-semibold text-[#2B2A2E]">No designations found.</h3>
+        <button type="button" onclick="openCreateDesignationModal()"
+            class="mt-4 rounded-xl bg-[#7C6A5B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D]">
+            Add Designation
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- =================== Create Designation Modal =================== -->
+<div id="createDesignationModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-[#2B2A2E]/50 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-[#E0D4C6] px-6 py-4">
+            <h2 class="text-lg font-semibold text-[#2B2A2E]">Add Designation</h2>
+            <button type="button" onclick="closeCreateDesignationModal()"
+                class="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[#F4F0EA]">
+                <img src="{% static 'icons/x.svg' %}" class="h-5 w-5 opacity-70" alt="Close">
+            </button>
+        </div>
+<form id="createDesignationForm" method="post" action="{% url 'designation_create' %}" class="space-y-4 p-6">            {% csrf_token %}
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Designation Name</label>
+                {{ form.name }}
+                <p data-form-error="create-name" class="mt-1 hidden text-xs text-red-600"></p>
+            </div>
+            <div id="createDesignationGeneralError" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"></div>
+            <div class="flex justify-end gap-3 border-t border-[#E0D4C6] pt-4">
+                <button type="button" onclick="closeCreateDesignationModal()"
+                    class="rounded-xl border border-[#E0D4C6] px-4 py-2.5 text-sm font-medium text-[#7C6A5B] transition hover:bg-[#F4F0EA]">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="rounded-xl bg-[#7C6A5B] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D]">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- =================== Edit Designation Modal =================== -->
+<div id="editDesignationModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-[#2B2A2E]/50 px-4 py-6 backdrop-blur-sm">
+    <div class="w-full max-w-lg overflow-hidden rounded-2xl border border-[#E0D4C6] bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-[#E0D4C6] px-6 py-4">
+            <h2 class="text-lg font-semibold text-[#2B2A2E]">Edit Designation</h2>
+            <button type="button" onclick="closeEditDesignationModal()"
+                class="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[#F4F0EA]">
+                <img src="{% static 'icons/x.svg' %}" class="h-5 w-5 opacity-70" alt="Close">
+            </button>
+        </div>
+        <form id="editDesignationForm" method="post" class="space-y-4 p-6">
+            {% csrf_token %}
+            <div>
+                <label class="mb-1 block text-sm font-medium text-[#2B2A2E]">Designation Name</label>
+                <input id="editDesignationName" type="text" name="name" required
+                    class="w-full px-3.5 py-2.5 border border-[#E0D4C6] rounded-xl bg-[#FDFCFB] text-sm text-[#2B2A2E] focus:outline-none focus:ring-2 focus:ring-[#C7A37E]/30 focus:border-[#C7A37E] transition">
+                <p data-form-error="edit-name" class="mt-1 hidden text-xs text-red-600"></p>
+            </div>
+            <div id="editDesignationGeneralError" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"></div>
+            <div class="flex justify-end gap-3 border-t border-[#E0D4C6] pt-4">
+                <button type="button" onclick="closeEditDesignationModal()"
+                    class="rounded-xl border border-[#E0D4C6] px-4 py-2.5 text-sm font-medium text-[#7C6A5B] transition hover:bg-[#F4F0EA]">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="rounded-xl bg-[#7C6A5B] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#69594D]">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCreateDesignationModal() {
+        clearErrors("createDesignationGeneralError", ["create-name"]);
+        document.getElementById("createDesignationForm").reset();
+        toggleModal("createDesignationModal", true);
+    }
+    function closeCreateDesignationModal() { toggleModal("createDesignationModal", false); }
+
+    function openEditDesignationModal(id, name) {
+        clearErrors("editDesignationGeneralError", ["edit-name"]);
+        document.getElementById("editDesignationName").value = name;
+        document.getElementById("editDesignationForm").action = `/lab/designations/edit/${id}/`;
+        toggleModal("editDesignationModal", true);
+    }
+    function closeEditDesignationModal() { toggleModal("editDesignationModal", false); }
+
+    function toggleModal(id, show) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.toggle("hidden", !show);
+        modal.classList.toggle("flex", show);
+        document.body.classList.toggle("overflow-hidden", show);
+    }
+
+    function clearErrors(generalId, fieldKeys) {
+        fieldKeys.forEach(key => {
+            const el = document.querySelector(`[data-form-error="${key}"]`);
+            if (el) { el.textContent = ""; el.classList.add("hidden"); }
+        });
+        const general = document.getElementById(generalId);
+        if (general) { general.textContent = ""; general.classList.add("hidden"); }
+    }
+
+    ["createDesignationModal", "editDesignationModal"].forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) modal.addEventListener("click", e => { if (e.target === modal) toggleModal(id, false); });
+    });
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+            toggleModal("createDesignationModal", false);
+            toggleModal("editDesignationModal", false);
+        }
+    });
+
+    document.getElementById("createDesignationForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        submitDesignationForm(this, "createDesignationGeneralError", "create-name", closeCreateDesignationModal);
+    });
+
+    document.getElementById("editDesignationForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        submitDesignationForm(this, "editDesignationGeneralError", "edit-name", closeEditDesignationModal);
+    });
+
+    function submitDesignationForm(form, generalErrorId, fieldKey, onSuccessClose) {
+        clearErrors(generalErrorId, [fieldKey]);
+        const formData = new FormData(form);
+        fetch(form.getAttribute("action"), {
+            method: "POST",
+            body: formData,
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+            .then(res => res.json().then(data => ({ ok: res.ok, data })))
+            .then(({ ok, data }) => {
+                if (!ok || !data.success) {
+                    const errors = data.errors || {};
+                    const generalEl = document.getElementById(generalErrorId);
+                    if (errors.name) {
+                        const el = document.querySelector(`[data-form-error="${fieldKey}"]`);
+                        if (el) {
+                            el.textContent = errors.name.map(e => e.message).join(" ");
+                            el.classList.remove("hidden");
+                        }
+                    } else if (generalEl) {
+                        generalEl.textContent = data.message || "Something went wrong.";
+                        generalEl.classList.remove("hidden");
+                    }
+                    return;
+                }
+                onSuccessClose();
+                window.location.reload();
+            })
+            .catch(() => {
+                const generalEl = document.getElementById(generalErrorId);
+                if (generalEl) {
+                    generalEl.textContent = "Something went wrong. Please try again.";
+                    generalEl.classList.remove("hidden");
+                }
+            });
+    }
+
+    const designationSearch = document.getElementById("designationSearch");
+    if (designationSearch) {
+        designationSearch.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+            document.querySelectorAll(".designation-row").forEach(row => {
+                row.classList.toggle("hidden", !(row.dataset.search || "").includes(query));
+            });
+        });
+    }
+</script>
+
+{% endblock %}

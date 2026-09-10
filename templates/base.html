@@ -137,7 +137,7 @@
                         </a>
                         {% endif %}
 
-                         {% if can_view_audit_log %}
+                        {% if can_view_audit_log %}
                         <a href="{% url 'audit_log_view' %}" class="block truncate rounded-lg px-3 py-2 text-sm transition
                         {% if request.resolver_match.url_name == 'audit_log_view' %}
                             bg-[#C7A37E]/15 text-[#D8B892]
@@ -148,6 +148,55 @@
                         </a>
                         {% endif %}
 
+
+                    </div>
+
+                </div>
+                {% endif %}
+
+                <!-- ==================Lab Management======================== -->
+                {% if can_view_lab_management %}
+                <div class="mt-2">
+
+                    <button type="button" onclick="toggleMenu('labManagementMenu', 'labManagementArrow')"
+                        title="Lab Management"
+                        class="nav-button flex h-10 w-full items-center justify-between rounded-lg px-3 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <img src="{% static 'icons/layout-dashboard.svg' %}"
+                                class="nav-icon h-[18px] w-[18px] shrink-0 brightness-0 invert" alt="">
+                            <span class="nav-text whitespace-nowrap">Lab Management</span>
+                        </div>
+
+                        <svg id="labManagementArrow"
+                            class="nav-arrow h-4 w-4 shrink-0 text-white/40 transition-transform duration-200"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <div id="labManagementMenu" class="nav-submenu ml-4 hidden space-y-1 border-l border-white/10 pl-3">
+
+                        {% if can_view_labs %}
+                        <a href="{% url 'lab_management' %}" class="block truncate rounded-lg px-3 py-2 text-sm transition
+                        {% if request.resolver_match.url_name == 'lab_management' %}
+                            bg-[#C7A37E]/15 text-[#D8B892]
+                        {% else %}
+                            text-white/50 hover:bg-white/5 hover:text-white
+                        {% endif %}">
+                            Labs
+                        </a>
+                        {% endif %}
+
+                        {% if can_view_designations %}
+                        <a href="{% url 'designation_management' %}" class="block truncate rounded-lg px-3 py-2 text-sm transition
+                        {% if request.resolver_match.url_name == 'designation_management' %}
+                            bg-[#C7A37E]/15 text-[#D8B892]
+                        {% else %}
+                            text-white/50 hover:bg-white/5 hover:text-white
+                        {% endif %}">
+                            Designations
+                        </a>
+                        {% endif %}
 
                     </div>
 
@@ -483,29 +532,44 @@
             }
         }
 
-document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
 
-    const currentPage = "{{ request.resolver_match.url_name }}";
+            const currentPage = "{{ request.resolver_match.url_name }}";
 
-    const userManagementPages = [
-        'user_list',
-        'role_management',
-        'permission_management',
-        'module_management',
-        'audit_log_view'
-    ];
+            const userManagementPages = [
+                'user_list',
+                'role_management',
+                'permission_management',
+                'module_management',
+                'audit_log_view'
+            ];
 
-    if (userManagementPages.includes(currentPage)) {
-        const menu = document.getElementById('userManagementMenu');
-        const arrow = document.getElementById('userManagementArrow');
+            if (userManagementPages.includes(currentPage)) {
+                const menu = document.getElementById('userManagementMenu');
+                const arrow = document.getElementById('userManagementArrow');
 
-        if (menu && arrow) {
-            menu.classList.remove('hidden');
-            arrow.classList.add('rotate-90');
-        }
-    }
+                if (menu && arrow) {
+                    menu.classList.remove('hidden');
+                    arrow.classList.add('rotate-90');
+                }
+            }
 
-});
+            const labManagementPages = [
+                'lab_management',
+                'designation_management'
+            ];
+
+            if (labManagementPages.includes(currentPage)) {
+                const menu = document.getElementById('labManagementMenu');
+                const arrow = document.getElementById('labManagementArrow');
+
+                if (menu && arrow) {
+                    menu.classList.remove('hidden');
+                    arrow.classList.add('rotate-90');
+                }
+            }
+
+        });
     </script>
     {% include 'includes/delete_modal.html' %}
 </body>

@@ -97,14 +97,16 @@ def role_delete(request, role_id):
 @role_required('role_edit')
 def role_edit(request, role_id):
     role = get_object_or_404(Role, id=role_id)
-    if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        description = request.POST.get('description', '').strip()
-        if name:
-            role.name = name
-            role.description = description
-            role.save()
-            return redirect('role_management')
+    if request.method != 'POST':
+        return redirect('role_management')
+    name = request.POST.get('name', '').strip()
+    description = request.POST.get('description', '').strip()
+    if not name:
+        return redirect('role_management')
+    role.name = name
+    role.description = description
+    role.save()
+    return redirect('role_management')
 
 @login_required
 @role_required('permission_management')
@@ -356,6 +358,7 @@ def user_edit(request, user_id):
                 'success': False,
                 'errors': form.errors.get_json_data(),
             }, status=400)
+        return redirect('user_list')
     user_obj.username = form.cleaned_data['username']
     user_obj.role = form.cleaned_data['role']
     user_obj.is_active = form.cleaned_data['is_active']

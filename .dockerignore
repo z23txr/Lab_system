@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.env
+.env.docker
+node_modules/
+staticfiles/
+media/
+*.log
+Pipfile
+Pipfile.lock
